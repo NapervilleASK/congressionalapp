@@ -1,9 +1,9 @@
 import { StyleSheet, View, Text} from 'react-native';
 
-export default function Index() {
+export default function News() {
   return (
     <View style = {styles.container}>
-      <Text style = {styles.header}>About Us</Text>
+      <Text style = {styles.header}>Environmental News</Text>
     </View>
   );
 }
