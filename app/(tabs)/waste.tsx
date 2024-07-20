@@ -1,14 +1,9 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Modal from "react-native-modal";
-
+import BottomSheet from 'react-native-simple-bottom-sheet';
 export default function Waste() {
-  const [isModalVisible, setModalVisible] = useState(true);
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
+  const panelRef = useRef(null);
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -30,7 +25,6 @@ export default function Waste() {
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
-
   return (
     <>
       <View style={styles.container}>
@@ -45,6 +39,11 @@ export default function Waste() {
           </View>
         </CameraView>
       </View>
+      <BottomSheet isOpen={false}>
+        <Text style={styles.header}>How do I use this?</Text> 
+        <Text style={styles.paragraph}>{`\nHave you ever had something you wanted to toss, but were unsure of whether it should go in the trash, recycling bin, or compost?\n\nOur waste classification feature uses the power of AI to tell you where it should go! Just snap a picture of the waste to get started.\n\n\n`}</Text>
+        <View />
+      </BottomSheet>
     </>
   );
 }
@@ -75,4 +74,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  header: {
+    fontSize:40,
+    color: 'black',
+    textAlign: 'center'
+  },
+  paragraph: {
+    fontSize:18,
+    color: 'black',
+    textAlign: 'center'
+  }
 });

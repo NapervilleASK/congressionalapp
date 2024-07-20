@@ -1,6 +1,6 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, View   } from 'react-native';
 function LogoTitle() {
   return (
     <View style = {{flexDirection:'row',alignItems:'center'}}>
@@ -17,8 +17,8 @@ export default function RootLayout() {
     <ThemeProvider value={DarkTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }} />
-        <Stack.Screen name="+not-found" />
+        <Stack.Screen name="+not-found" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }}/>
       </Stack>
-    </ThemeProvider>
+    </ThemeProvider>  
   );
 }
