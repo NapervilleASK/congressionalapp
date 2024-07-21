@@ -2,7 +2,7 @@ import { StyleSheet, View, Text} from 'react-native';
 
 export default function Tips() {
   return (
-    <View style = {styles.container}>
+    <View>
       <Text style = {styles.header}>Carbon Tips</Text>
     </View>
   );
