@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, StyleSheet, Dimensions, Image } from 'react-native';
-import { Card, Text, Button, ActivityIndicator, MD2Colors } from 'react-native-paper';
+import { ScrollView, View, StyleSheet, Dimensions, Image, Platform, TouchableOpacity } from 'react-native';
+import { Card, Text, ActivityIndicator, MD2Colors } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const placeholderImage = require('@/assets/images/no_image.png');
 
 const NewsDashboard = () => {
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetch('https://congressionalappserver3.vercel.app/news')
@@ -24,39 +26,44 @@ const NewsDashboard = () => {
   }, []);
 
   if (loading) {
-    return <ActivityIndicator animating={true} color={MD2Colors.red800} />;
+    return (  
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator animating={true} color={MD2Colors.red800} size="large" />
+      </View>
+    )
   }
 
   return (
     <ScrollView
       style={styles.scrollView}
-      snapToInterval={height * 0.4}
-      snapToAlignment="center"
-      decelerationRate="fast"
+      contentContainerStyle={styles.contentContainer}
+      {...(Platform.OS !== 'web' && {
+        snapToOffsets: Array.from(Array(1000).keys()).map(x => x * 351.6),
+        snapToAlignment: 'center',
+        decelerationRate: 'fast'
+      })}
     >
       {newsData.map((article: any, index) => (
-        <Card key={index} style={styles.card}>
-          <Card.Content style={styles.cardContent}>
-            <View style={styles.textContainer}>
-              <Text variant="displayLarge" style={styles.title}>
-                {article.title}
-              </Text>
-              <Text variant="bodyLarge" style={styles.subtitle}>
-                {article.date} - {article.authors[0]?.name || 'Unknown'}
-              </Text>
-              <Text variant="bodyMedium" style={styles.snippet}>
-                {article.body.substring(0, 300)}...
-              </Text>
+        <TouchableOpacity
+          key={index}
+          onPress={() => router.push({ pathname: 'article', params: { uri: article.uri } })}
+        >
+          <Card style={styles.card}>
+            <View style={styles.cardContent}>
+              <View style={styles.textContainer}>
+                <Text style={styles.title}>{article.title}</Text>
+                <Text style={styles.secondaryText}>{`${article.date} by \n${article.authors[0] ? article.authors[0].name : 'Anonymous'}`}</Text>
+              </View>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={article.image ? { uri: article.image } : placeholderImage}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </View>
             </View>
-            <View style={styles.imageContainer}>
-              <Image 
-                source={article.image ? { uri: article.image } : placeholderImage} 
-                style={styles.image} 
-                resizeMode="cover" 
-              />
-            </View>
-          </Card.Content>
-        </Card>
+          </Card>
+        </TouchableOpacity>
       ))}
     </ScrollView>
   );
@@ -66,6 +73,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  contentContainer: {
+    paddingVertical: 10,
+  },
   card: {
     height: height * 0.37,
     marginVertical: 10,
@@ -73,41 +83,39 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 1,
   },
   textContainer: {
-    flex: 1,
-    paddingRight: 10,
+    width: '50%',
+    padding: 10,
+    justifyContent: 'center',
+  },
+  imageContainer: {
+    width: '50%',
     justifyContent: 'center',
   },
   title: {
-    fontSize: 30,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 5,
-    lineHeight: 35,
   },
-  subtitle: {
-    fontSize: 18, 
-    color: 'gray',
-    marginBottom: 10,
-  },
-  snippet: {
-    fontSize: 16,
-    marginTop: 5,
-  },
-  imageContainer: {
-    width: '40%',
-    justifyContent: 'center', // Center the image and button vertically
+  secondaryText: {
+    fontSize: 14,
+    color: 'grey',
+    marginTop: 4,
   },
   image: {
-    width: 550,
-    height: 250,
-  },
-  button: {
     width: '100%',
-    height: '15%',
+    height: '100%',
+    ...Platform.select({
+      web: {
+        height: 290,
+      },
+    }),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 export default NewsDashboard;

@@ -21,6 +21,8 @@ export default function RootLayout() {
         {/*@ts-ignore*/}
         <Stack.Screen name="(tabs)" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }} />
         {/*@ts-ignore*/}
+        <Stack.Screen name="article" options={{ headerTitleAlign: 'center', headerTitle: (props) => <LogoTitle {...props} /> }}/>
+        {/*@ts-ignore*/}
         <Stack.Screen name="+not-found" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }}/>
       </Stack>
       
