@@ -13,6 +13,7 @@ const NewsDashboard = () => {
   const router = useRouter();
 
   useEffect(() => {
+    //
     fetch('https://congressionalappserver.vercel.app/news')
       .then((response) => response.json())
       .then((data) => {
