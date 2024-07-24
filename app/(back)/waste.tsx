@@ -29,7 +29,7 @@
       else
         parsed = photo.base64;
         try {
-          const response = await fetch('https://congressionalappserver3.vercel.app/upload', {
+          const response = await fetch('https://congressionalappserver.vercel.app/upload', {
             method: 'POST',
             headers: {
               'Content-Type': 'text/plain',
@@ -162,18 +162,21 @@
       flex: 1,
     },
     buttonContainer: {
-      flex: 1,
+      flex:1,
       flexDirection: 'row',
       backgroundColor: 'transparent',
-      margin: 64,
+      margin: 10,
     },
-    button: {
-      flex: 1,
-      alignSelf: 'flex-end',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      padding: 20,
-    },
+      button: {
+        flex: 1,
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 20,
+        marginBottom:60,
+        height:'12%'
+      },
     text: {
       fontSize: 24,
       fontWeight: 'bold',

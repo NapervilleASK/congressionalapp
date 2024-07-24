@@ -9,7 +9,8 @@ export default function NewsArticle() {
   const [loading, setLoading] = useState(true);   
   
   useEffect(() => {
-    fetch(`http://localhost:3000/article?uri=${uri}`)
+    //https://congressionalappserver.vercel.app/article
+    fetch(`https://congressionalappserver.vercel.app/article?uri=${uri}`)
       .then((response) => response.text())
       .then((data: any) => {        
         setArticleData(data);
@@ -52,7 +53,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   textContainer: {
-    width:'80%',
+    ...Platform.select({
+        ios: {
+            width:'100%'
+        },
+        android: {
+            width:'100%'
+        },
+        default: {
+          width:'80%'
+        },
+      }),
     alignSelf:'center',
     padding:20
   },
@@ -67,7 +78,8 @@ const newStyles = StyleSheet.create({
   // The main container
   body: {
     fontSize:15,
-    lineHeight:23
+    lineHeight:23,
+    color:'white'
   },
 
   // Headings
@@ -76,42 +88,48 @@ const newStyles = StyleSheet.create({
     fontSize: 40,
     fontWeight:'bold',
     marginTop:30,
-    marginBottom:20
+    marginBottom:20,
+    lineHeight:50
   },
   heading2: {
     flexDirection: 'row',
     fontSize: 35,
     fontWeight:'bold',
     marginTop:25,
-    marginBottom:10
+    marginBottom:10,
+    lineHeight:40
   },
   heading3: {
     flexDirection: 'row',
     fontSize: 30,
     fontWeight:'bold',
     marginTop:20,
-    marginBottom:10
+    marginBottom:10,
+    lineHeight:35
   },
   heading4: {
     flexDirection: 'row',
-    fontSize: 25,
+    fontSize: 20,
     fontWeight:'bold',
     marginTop:15,
-    marginBottom:10
+    marginBottom:10,
+    lineHeight:30
   },
   heading5: {
     flexDirection: 'row',
-    fontSize: 20,
+    fontSize: 17,
     fontWeight:'bold',
     marginTop:10,
-    marginBottom:10
+    marginBottom:10,
+    lineHeight:20
   },
   heading6: {
     flexDirection: 'row',
     fontSize: 15,
     fontWeight:'bold',
-    marginTop:5,
-    marginBottom:10
+    marginTop:5 ,
+    marginBottom:10,
+    lineHeight:15
   },
 
   // Horizontal Rule
@@ -247,7 +265,7 @@ const newStyles = StyleSheet.create({
 
   // Images
   image: {
-    flex: 1,
+    flex: 1
   },
 
   // Text Output

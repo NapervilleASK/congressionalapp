@@ -5,6 +5,7 @@ export default function Tips() {
     <View>
       <Text style = {styles.header}>404 | Not found</Text>
       <Text style={{color: 'dodgerblue',textAlign:'center',fontSize:20,marginTop:30}}
+      //@ts-ignore
       onPress={() => Linking.openURL('/',"_self")}> Go to home page? </Text>
     </View>
   );

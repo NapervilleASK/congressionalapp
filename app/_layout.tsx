@@ -19,7 +19,7 @@ export default function RootLayout() {
     <ThemeProvider value={DarkTheme}>
       <Stack>
         {/*@ts-ignore*/}
-        <Stack.Screen name="(tabs)" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }} />
+        <Stack.Screen name="(back)" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }} />
         {/*@ts-ignore*/}
         <Stack.Screen name="article" options={{ headerTitleAlign: 'center', headerTitle: (props) => <LogoTitle {...props} /> }}/>
         {/*@ts-ignore*/}
