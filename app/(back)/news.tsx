@@ -51,7 +51,7 @@ const NewsDashboard = () => {
           <Card style={styles.card}>
             <View style={styles.cardContent}>
               <View style={styles.textContainer}>
-                <Text style={styles.title}>{article.title}</Text>
+                <Text style={styles.title}>{article.title.length > 90 ? article.title.substring(0,90) + "..." : article.title}</Text>
                 <Text style={styles.secondaryText}>{`${article.date} by \n${article.authors[0] ? article.authors[0].name : 'Anonymous'}`}</Text>
               </View>
               <View style={styles.imageContainer}>
