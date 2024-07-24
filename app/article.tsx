@@ -14,6 +14,7 @@ export default function NewsArticle() {
       .then((response) => response.text())
       .then((data: any) => {        
         setArticleData(data);
+        console.log (data)
         setLoading(false);
       })
       .catch((error) => {
@@ -151,7 +152,7 @@ const newStyles = StyleSheet.create({
 
   // Blockquotes
   blockquote: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#000000',
     borderColor: '#CCC',
     borderLeftWidth: 4,
     marginLeft: 5,
@@ -188,7 +189,7 @@ const newStyles = StyleSheet.create({
   code_inline: {
     borderWidth: 1,
     borderColor: '#CCCCCC',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#000000',
     padding: 10,
     borderRadius: 4,
     ...Platform.select({
@@ -203,7 +204,7 @@ const newStyles = StyleSheet.create({
   code_block: {
     borderWidth: 1,
     borderColor: '#CCCCCC',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#000000',
     padding: 10,
     borderRadius: 4,
     ...Platform.select({
@@ -218,7 +219,7 @@ const newStyles = StyleSheet.create({
   fence: {
     borderWidth: 1,
     borderColor: '#CCCCCC',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#000000',
     padding: 10,
     borderRadius: 4,
     ...Platform.select({
