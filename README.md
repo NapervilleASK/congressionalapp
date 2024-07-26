@@ -1,6 +1,7 @@
-# EcoSense: Revolutionizing Environmental Awareness
+![image](https://github.com/user-attachments/assets/4686e67e-6609-4440-9b5b-d6ad6c5db80e)
 
-EcoSense is an innovative mobile application designed to address the pressing issues of climate change by providing users with actionable information and tools to make environmentally conscious decisions. Developed for the Congressional App Challenge, EcoSense aims to foster a more sustainable future through three core features:
+
+EcoSense is a cross-platform app available wherever you go, designed to address the pressing issues of climate change by providing users with actionable information and tools to make environmentally conscious decisions. Developed for the Congressional App Challenge, EcoSense aims to foster a more sustainable future through three core features:
 
 ## Features
 
