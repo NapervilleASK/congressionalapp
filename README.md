@@ -1,50 +1,54 @@
-# Welcome to your Expo app 👋
+# EcoSense: Revolutionizing Environmental Awareness
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+EcoSense is an innovative mobile application designed to address the pressing issues of climate change by providing users with actionable information and tools to make environmentally conscious decisions. Developed for the Congressional App Challenge, EcoSense aims to foster a more sustainable future through three core features:
 
-## Get started
+## Features
 
-1. Install dependencies
+### Environmental News
+Stay updated with the latest developments in environmental science and climate change through our comprehensive news feed. EcoSense aggregates articles from various reputable sources, providing users with up-to-date and relevant information about environmental issues and solutions.
 
-   ```bash
-   npm install
-   ```
+### Garbage Classifier
+A practical tool for everyday sustainability, the Garbage Classifier helps users sort their waste correctly. By leveraging machine learning technology, users can take a picture of their waste and get instant feedback on how to dispose of it properly. This feature aims to reduce contamination in recycling streams and promote responsible waste management.
 
-2. Start the app
+### Eco Forum
+Join a community of like-minded individuals in the Eco Forum. This space is dedicated to discussions about environmentally friendly practices, climate change solutions, and sustainable living tips. Users can exchange ideas, ask questions, and collaborate on eco-friendly initiatives.
 
-   ```bash
-    npx expo start
-   ```
+## Statistics & Problems Associated with Climate Change
 
-In the output, you'll find options to open the app in a
+Climate change is one of the most significant challenges facing our planet today. Key statistics highlight the urgency of action:
+- **Global Temperature Rise**: The Earth’s average surface temperature has risen by about 1.2°C (2.2°F) since the late 19th century.
+- **Carbon Dioxide Levels**: Atmospheric CO₂ concentrations have increased by more than 40% since the industrial revolution.
+- **Ice Melt and Sea-Level Rise**: Polar ice caps are melting at an accelerated rate, contributing to rising sea levels and increased flooding.
+- **Extreme Weather Events**: There has been a significant increase in the frequency and severity of extreme weather events, including hurricanes, droughts, and heatwaves.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+EcoSense seeks to address these issues by empowering users with knowledge and tools to make a difference in their daily lives.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Technologies Used
 
-## Get a fresh project
+### React Native
+EcoSense is built using React Native, a powerful cross-platform technology that allows us to develop applications for Android, iOS, and web with a single codebase. This approach not only saves development time but also ensures a consistent user experience across different platforms.
 
-When you're ready, run:
+### Expo
+Expo is a framework that complements React Native, providing a set of tools and libraries that expedite the development process. It simplifies the process of building, testing, and deploying React Native applications, making development more efficient.
 
-```bash
-npm run reset-project
-```
+### React Native Paper
+To create a modern and intuitive user interface, EcoSense utilizes React Native Paper, a material design compliant UI library for React Native. This library helps us deliver a polished and consistent look and feel across the application.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### React Native Bottom Bar
+The Garbage Classifier feature integrates the React Native Bottom Bar, which provides users with easy access to the classification information and navigation options, enhancing usability and interaction.
 
-## Learn more
+### Node.js
+The backend of EcoSense is powered by Node.js, a server-side JavaScript engine known for its efficiency and scalability. Node.js handles API requests and processes data securely, ensuring reliable performance.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Express
+Express is a framework for Node.js that simplifies the development of web applications and APIs. It makes the server-side code easier to read and maintain, allowing us to deliver robust and scalable backend solutions.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Google Gemini
+Google Gemini, a large language model, is used for its multimodal capabilities to recognize and classify images in the Garbage Classifier feature. It also formats raw text into well-structured news articles for the Environmental News section, providing users with high-quality content.
 
-## Join the community
+### Event Registry
+To provide the latest news updates, EcoSense integrates with Event Registry, a powerful News API that offers recent articles on a wide range of topics, including environmental issues and climate change.
 
-Join our community of developers creating universal apps.
+## Conclusion
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+EcoSense is more than just an application; it’s a platform for change. By leveraging cutting-edge technology and providing valuable resources, EcoSense empowers individuals to make informed decisions and contribute to a more sustainable future. Join us in making a difference—one click at a time.
