@@ -42,9 +42,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="tips"
+        name="forum"
         options={{
-          title: 'Carbon Tips',
+          title: 'Eco Forum',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'leaf' : 'leaf-outline'} color={color} />
           ),
