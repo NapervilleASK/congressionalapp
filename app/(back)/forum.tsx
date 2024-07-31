@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Modal, Portal, Button } from 'react-native-paper';
 
 const { width } = Dimensions.get('window');
 
-const InputField = ({ value, onChangeText, placeholder, style }) => (
+interface PostType {
+  id: number;
+  title: string;
+  content: string;
+  comments: string[];
+  likes: number;
+  hasLiked: boolean;
+  isSaved: boolean;
+}
+
+const InputField: React.FC<{ value: string; onChangeText: (text: string) => void; placeholder: string; style?: object }> = ({ value, onChangeText, placeholder, style }) => (
   <TextInput
     style={[styles.input, style]}
     value={value}
@@ -14,29 +25,42 @@ const InputField = ({ value, onChangeText, placeholder, style }) => (
   />
 );
 
-const Post = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, isExpanded, onPress }) => {
+const Post: React.FC<{
+  post: PostType;
+  onAddComment: (postId: number, comment: string) => void;
+  onLike: (postId: number) => void;
+  onSave: (postId: number) => void;
+  hasLiked: boolean;
+  isSaved: boolean;
+  isExpanded: boolean;
+  onPress: () => void;
+}> = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, isExpanded, onPress }) => {
   const [newComment, setNewComment] = useState('');
+  const [visible, setVisible] = useState(false);
+
+  const showModal = () => setVisible(true);
+  const hideModal = () => setVisible(false);
 
   return (
     <View style={styles.post}>
-      <TouchableWithoutFeedback onPress={onPress}>
+      <TouchableWithoutFeedback onPress={showModal}>
         <View>
           <Text style={styles.postTitle}>{post.title}</Text>
           <Text style={styles.postContent}>{post.content}</Text>
           
           <View style={styles.actionContainer}>
             <View style={styles.likeAndSaveContainer}>
-              <TouchableOpacity onPress={onLike} style={styles.actionButton}>
+              <TouchableOpacity onPress={() => onLike(post.id)} style={styles.actionButton}>
                 <Icon name={hasLiked ? 'favorite' : 'favorite-border'} size={24} color={hasLiked ? 'red' : 'gray'} />
                 <Text style={styles.likeCount}>{post.likes}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={onSave} style={styles.actionButton}>
+              <TouchableOpacity onPress={() => onSave(post.id)} style={styles.actionButton}>
                 <Icon name={isSaved ? 'bookmark' : 'bookmark-border'} size={24} color={isSaved ? 'green' : 'gray'} />
                 <Text style={styles.saveCount}>{isSaved ? 'Saved' : 'Save'}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.commentSection}>
-              <TouchableOpacity style={styles.commentButton} onPress={onPress}>
+              <TouchableOpacity style={styles.commentButton}>
                 <Icon name="comment" size={24} color="#D3D3D3" />
                 <Text style={styles.commentCount}>{post.comments.length}</Text>
               </TouchableOpacity>
@@ -44,54 +68,58 @@ const Post = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, isExpande
           </View>
         </View>
       </TouchableWithoutFeedback>
-      
-      {isExpanded && (
-        <View style={styles.commentsContainer}>
-          <FlatList
-            data={post.comments}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => <Text style={styles.comment}>{item}</Text>}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      )}
-      
-      {isExpanded && (
-        <View style={styles.commentInputContainer}>
-          <InputField
-            value={newComment}
-            onChangeText={setNewComment}
-            placeholder="Add a comment"
-            style={styles.commentInput}
-          />
-          <TouchableOpacity 
-            style={styles.submitButton} 
-            onPress={() => {
-              if (newComment.trim()) {
-                onAddComment(post.id, newComment);
-                setNewComment('');
-              }
-            }}
-          >
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+
+      <Portal>
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalContainer}>
+          <View>
+            <Text style={styles.postTitle}>{post.title}</Text>
+            <Text style={styles.postContent}>{post.content}</Text>
+            
+            <FlatList
+              data={post.comments}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => <Text style={styles.comment}>{item}</Text>}
+              showsVerticalScrollIndicator={false}
+              style={styles.commentsContainer}
+            />
+
+            <View style={styles.commentInputContainer}>
+              <InputField
+                value={newComment}
+                onChangeText={setNewComment}
+                placeholder="Add a comment"
+                style={styles.commentInput}
+              />
+              <TouchableOpacity 
+                style={styles.submitButton} 
+                onPress={() => {
+                  if (newComment.trim()) {
+                    onAddComment(post.id, newComment);
+                    setNewComment('');
+                  }
+                }}
+              >
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </Portal>
     </View>
   );
 };
 
-export default function Forum() {
-  const [posts, setPosts] = useState([]);
+const Forum: React.FC = () => {
+  const [posts, setPosts] = useState<PostType[]>([]);
   const [newPost, setNewPost] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [showInput, setShowInput] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState(null);
+  const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
   const [viewSavedPosts, setViewSavedPosts] = useState(false);
 
   const handleAddPost = () => {
     if (newPost.trim() && newDescription.trim()) {
-      const newPostObject = {
+      const newPostObject: PostType = {
         id: posts.length + 1,
         title: newPost,
         content: newDescription,
@@ -109,7 +137,7 @@ export default function Forum() {
     }
   };
 
-  const handleAddComment = (postId, comment) => {
+  const handleAddComment = (postId: number, comment: string) => {
     setPosts(posts.map(post =>
       post.id === postId
         ? { ...post, comments: [...post.comments, comment] }
@@ -117,7 +145,7 @@ export default function Forum() {
     ));
   };
 
-  const handleLike = (postId) => {
+  const handleLike = (postId: number) => {
     setPosts(posts.map(post =>
       post.id === postId
         ? { ...post, likes: post.hasLiked ? post.likes - 1 : post.likes + 1, hasLiked: !post.hasLiked }
@@ -125,7 +153,7 @@ export default function Forum() {
     ));
   };
 
-  const handleSave = (postId) => {
+  const handleSave = (postId: number) => {
     setPosts(posts.map(post =>
       post.id === postId
         ? { ...post, isSaved: !post.isSaved }
@@ -133,7 +161,7 @@ export default function Forum() {
     ));
   };
 
-  const handlePressPost = (postId) => {
+  const handlePressPost = (postId: number) => {
     setExpandedPostId(expandedPostId === postId ? null : postId);
   };
 
@@ -144,11 +172,11 @@ export default function Forum() {
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.addButton} onPress={() => setShowInput(true)}>
-          <Text style={styles.addButtonText}>Get New Post</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.addButton} onPress={handleViewSavedPosts}>
           <Text style={styles.addButtonText}>{viewSavedPosts ? 'View All Posts' : 'View Saved Posts'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.addButton} onPress={() => setShowInput(true)}>
+          <Text style={styles.addButtonText}>Create New Post</Text>
         </TouchableOpacity>
       </View>
       {showInput && (
@@ -157,13 +185,13 @@ export default function Forum() {
             value={newPost}
             onChangeText={setNewPost}
             placeholder="Title"
-            style={styles.titleInput}
+            style={[styles.titleInput, styles.boldText]} // Added bold style
           />
           <InputField
             value={newDescription}
             onChangeText={setNewDescription}
             placeholder="Description"
-            style={styles.descriptionInput}
+            style={styles.descriptionInput} // Updated color
           />
           <TouchableOpacity style={styles.submitButton} onPress={handleAddPost}>
             <Text style={styles.submitButtonText}>Add Post</Text>
@@ -189,7 +217,7 @@ export default function Forum() {
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -199,8 +227,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column', // Stack buttons vertically
     marginBottom: 10,
   },
   addButton: {
@@ -208,8 +235,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginVertical: 5,
-    flex: 1,
-    marginHorizontal: 5,
+    alignSelf: 'center', // Center buttons
   },
   addButtonText: {
     color: '#ffffff', // White text
@@ -225,45 +251,67 @@ const styles = StyleSheet.create({
   },
   post: {
     backgroundColor: '#1C1C1C', // Dark background for posts
-    width: width * 0.9, // Responsive width
-    marginVertical: 10,
     padding: 15,
     borderRadius: 10,
-    alignSelf: 'center',
+    marginBottom: 10,
   },
   postTitle: {
-    color: '#006400', // Dark Green for post title
     fontSize: 18,
+    color: '#006400', // Dark green for titles
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 10, // Space between title and description
   },
   postContent: {
-    color: '#D3D3D3', // Light Gray for post content
+    fontSize: 16,
+    color: '#D3D3D3', // White text for content
+    marginBottom: 10, // Space between content and comments
+  },
+  input: {
+    backgroundColor: '#1C1C1C', // Dark background for input fields
+    color: '#006400', // Dark green text
+    borderWidth: 1,
+    borderColor: '#006400', // Dark green border
+    padding: 10,
     marginBottom: 10,
+    borderRadius: 5,
+  },
+  titleInput: {
+    fontSize: 18,
+  },
+  descriptionInput: {
+    fontSize: 16,
+    color: '#D3D3D3', // White text
+  },
+  submitButton: {
+    backgroundColor: '#228B22', // Green for submit button
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#ffffff', // White text
   },
   actionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
   },
   likeAndSaveContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: 10,
   },
   likeCount: {
-    color: '#D3D3D3', // Light Gray for like count
+    color: '#D3D3D3',
     marginLeft: 5,
-    fontSize: 16,
   },
   saveCount: {
-    color: '#D3D3D3', // Light Gray for save status
+    color: '#D3D3D3',
     marginLeft: 5,
-    fontSize: 16,
   },
   commentSection: {
     flexDirection: 'row',
@@ -272,60 +320,34 @@ const styles = StyleSheet.create({
   commentButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: '#2B4', // Steel Blue for comment button
   },
   commentCount: {
-    color: '#D3D3D3', // Light Gray for comment count
+    color: '#D3D3D3',
     marginLeft: 5,
-    fontSize: 16,
   },
   commentsContainer: {
-    marginTop: 10,
-    maxHeight: 150,
-  },
-  comment: {
-    color: '#D3D3D3', // Light Gray for comments
-    marginBottom: 5,
+    maxHeight: 150, // Adjust as needed
   },
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
   },
   commentInput: {
     flex: 1,
-    backgroundColor: '#333333', // Dark Gray for comment input
-    padding: 10,
-    borderRadius: 5,
     marginRight: 10,
-    color: '#D3D3D3', // Light Gray text for comment input
   },
-  submitButton: {
-    backgroundColor: '#228B22', // Green for submit button
-    padding: 10,
-    borderRadius: 5,
+  comment: {
+    color: '#D3D3D3', // Light gray for comments
+    marginVertical: 5,
   },
-  submitButtonText: {
-    color: '#ffffff', // White text for submit button
+  modalContainer: {
+    backgroundColor: '#1C1C1C', // Dark background for modal
+    padding: 20,
+    borderRadius: 10,
   },
-  titleInput: {
-    color: '#006400', // Dark Green for title input
+  boldText: {
     fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  descriptionInput: {
-    color: '#D3D3D3', // Light Gray for description input
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#333333', // Dark Gray border for input fields
-    padding: 10,
-    borderRadius: 5,
-    color: '#D3D3D3', // Light Gray text for input fields
   },
 });
+
+export default Forum;
