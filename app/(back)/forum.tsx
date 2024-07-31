@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const { width } = Dimensions.get('window');
 
 const InputField = ({ value, onChangeText, placeholder, style }) => (
   <TextInput
@@ -30,13 +32,15 @@ const Post = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, isExpande
               </TouchableOpacity>
               <TouchableOpacity onPress={onSave} style={styles.actionButton}>
                 <Icon name={isSaved ? 'bookmark' : 'bookmark-border'} size={24} color={isSaved ? 'green' : 'gray'} />
+                <Text style={styles.saveCount}>{isSaved ? 'Saved' : 'Save'}</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.commentButton} onPress={onPress}>
-              <Text style={styles.commentButtonText}>
-                {isExpanded ? 'Hide Comments' : 'Show Comments'}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.commentSection}>
+              <TouchableOpacity style={styles.commentButton} onPress={onPress}>
+                <Icon name="comment" size={24} color="#D3D3D3" />
+                <Text style={styles.commentCount}>{post.comments.length}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -52,25 +56,27 @@ const Post = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, isExpande
         </View>
       )}
       
-      <View style={styles.commentInputContainer}>
-        <InputField
-          value={newComment}
-          onChangeText={setNewComment}
-          placeholder="Add a comment"
-          style={styles.commentInput}
-        />
-        <TouchableOpacity 
-          style={styles.submitButton} 
-          onPress={() => {
-            if (newComment.trim()) {
-              onAddComment(post.id, newComment);
-              setNewComment('');
-            }
-          }}
-        >
-          <Text style={styles.submitButtonText}>Submit</Text>
-        </TouchableOpacity>
-      </View>
+      {isExpanded && (
+        <View style={styles.commentInputContainer}>
+          <InputField
+            value={newComment}
+            onChangeText={setNewComment}
+            placeholder="Add a comment"
+            style={styles.commentInput}
+          />
+          <TouchableOpacity 
+            style={styles.submitButton} 
+            onPress={() => {
+              if (newComment.trim()) {
+                onAddComment(post.id, newComment);
+                setNewComment('');
+              }
+            }}
+          >
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -94,7 +100,7 @@ export default function Forum() {
         hasLiked: false,
         isSaved: false,
       };
-      setPosts([...posts, newPostObject]);
+      setPosts([newPostObject, ...posts]); // Add new posts to the beginning
       setNewPost('');
       setNewDescription('');
       setShowInput(false);
@@ -188,48 +194,51 @@ export default function Forum() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#000000', // Main background color
     paddingTop: 40,
+    paddingHorizontal: 10,
   },
   buttonContainer: {
-    position: 'absolute',
-    top: 40,
-    left: 10,
-    zIndex: 1,
-  },
-  addButton: {
-    backgroundColor: 'green',
-    padding: 10,
-    borderRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
+  addButton: {
+    backgroundColor: '#228B22', // Green for buttons
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    flex: 1,
+    marginHorizontal: 5,
+  },
   addButtonText: {
-    color: 'white',
+    color: '#ffffff', // White text
+    textAlign: 'center',
   },
   inputContainer: {
-    width: '60%',
-    backgroundColor: '#ffffff',
+    width: width * 0.9, // Responsive width
+    backgroundColor: '#1C1C1C', // Dark background for input container
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     alignSelf: 'center',
   },
   post: {
-    backgroundColor: '#ffffff',
-    width: '60%',
+    backgroundColor: '#1C1C1C', // Dark background for posts
+    width: width * 0.9, // Responsive width
     marginVertical: 10,
     padding: 15,
     borderRadius: 10,
     alignSelf: 'center',
   },
   postTitle: {
-    color: 'darkgreen',
+    color: '#006400', // Dark Green for post title
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
   },
   postContent: {
-    color: 'black',
+    color: '#D3D3D3', // Light Gray for post content
     marginBottom: 10,
   },
   actionContainer: {
@@ -247,23 +256,37 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   likeCount: {
+    color: '#D3D3D3', // Light Gray for like count
     marginLeft: 5,
-    color: 'gray',
+    fontSize: 16,
+  },
+  saveCount: {
+    color: '#D3D3D3', // Light Gray for save status
+    marginLeft: 5,
+    fontSize: 16,
+  },
+  commentSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   commentButton: {
-    backgroundColor: 'blue',
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 10,
     borderRadius: 5,
+    backgroundColor: '#2B4', // Steel Blue for comment button
   },
-  commentButtonText: {
-    color: 'white',
+  commentCount: {
+    color: '#D3D3D3', // Light Gray for comment count
+    marginLeft: 5,
+    fontSize: 16,
   },
   commentsContainer: {
     marginTop: 10,
     maxHeight: 150,
   },
   comment: {
-    color: 'black',
+    color: '#D3D3D3', // Light Gray for comments
     marginBottom: 5,
   },
   commentInputContainer: {
@@ -273,35 +296,36 @@ const styles = StyleSheet.create({
   },
   commentInput: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#333333', // Dark Gray for comment input
     padding: 10,
     borderRadius: 5,
     marginRight: 10,
+    color: '#D3D3D3', // Light Gray text for comment input
   },
   submitButton: {
-    backgroundColor: 'green',
+    backgroundColor: '#228B22', // Green for submit button
     padding: 10,
     borderRadius: 5,
   },
   submitButtonText: {
-    color: 'white',
+    color: '#ffffff', // White text for submit button
   },
   titleInput: {
-    color: 'darkgreen',
+    color: '#006400', // Dark Green for title input
     fontWeight: 'bold',
     fontSize: 18,
     marginBottom: 10,
   },
   descriptionInput: {
-    color: 'black',
+    color: '#D3D3D3', // Light Gray for description input
     fontSize: 16,
     marginBottom: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#333333', // Dark Gray border for input fields
     padding: 10,
     borderRadius: 5,
-    color: 'black',
+    color: '#D3D3D3', // Light Gray text for input fields
   },
 });
