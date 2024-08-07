@@ -1,6 +1,6 @@
 ![image](https://github.com/user-attachments/assets/b45548b0-923f-438c-815c-8168adb74245)
 
-EcoSense is a cross-platform app available wherever you go, designed to address the pressing issues of climate change by providing users with actionable information and tools to make environmentally conscious decisions. Developed for the Congressional App Challenge, EcoSense aims to foster a more sustainable future through three core features:
+EcoSense is a cross-platform app available wherever you go, designed to address the pressing issues related to our Earth by providing users with actionable information and tools to make environmentally conscious decisions. Developed for the Congressional App Challenge, EcoSense aims to foster a more sustainable future through three core features:
 
 ## Features
 
@@ -52,3 +52,8 @@ To provide the latest news updates, EcoSense integrates with Event Registry, a p
 ## Conclusion
 
 EcoSense is more than just an application; it’s a platform for change. By leveraging cutting-edge technology and providing valuable resources, EcoSense empowers individuals to make informed decisions and contribute to a more sustainable future. Join us in making a difference—one click at a time.
+
+
+## Set-up
+
+To run this project on your device, you need to clone this repo (`git clone https://github.com/Kudostoy0u/congressionalapp`), and run the app (`cd congressionalapp && npm start`)
