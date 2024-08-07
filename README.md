@@ -54,6 +54,6 @@ To provide the latest news updates, EcoSense integrates with Event Registry, a p
 EcoSense is more than just an application; it’s a platform for change. By leveraging cutting-edge technology and providing valuable resources, EcoSense empowers individuals to make informed decisions and contribute to a more sustainable future. Join us in making a difference—one click at a time.
 
 
-## Set-up
+# Set-up
 
 To run this project on your device, you need to clone this repo (`git clone https://github.com/Kudostoy0u/congressionalapp`), and run the app (`cd congressionalapp && npm start`)
