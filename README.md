@@ -56,4 +56,4 @@ EcoSense is more than just an application; it’s a platform for change. By leve
 
 # Set-up
 
-To run this project on your device, you need to clone this repo (`git clone https://github.com/Kudostoy0u/congressionalapp`), and run the app (`cd congressionalapp && npm start`)
+To run our project locally, on your device, you need to clone this repo (`git clone https://github.com/Kudostoy0u/congressionalapp`), move into the appropriate directory (`cd congressionalapp`), install dependencies (`npm i`) and run the app (`npm start`).
