@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Modal, Portal } from 'react-native-paper';
 
@@ -32,9 +32,8 @@ const Post: React.FC<{
   onSave: (postId: number) => void;
   hasLiked: boolean;
   isSaved: boolean;
-  isExpanded: boolean;
   onPress: () => void;
-}> = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, isExpanded, onPress }) => {
+}> = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, onPress }) => {
   const [newComment, setNewComment] = useState('');
   const [visible, setVisible] = useState(false);
 
@@ -42,12 +41,12 @@ const Post: React.FC<{
   const hideModal = () => setVisible(false);
 
   return (
-    <View style={[styles.post, isExpanded && styles.expandedPost]}>
+    <View style={styles.post}>
       <TouchableWithoutFeedback onPress={showModal}>
         <View>
           <Text style={styles.postTitle}>{post.title}</Text>
           <Text style={styles.postContent}>{post.content}</Text>
-          
+
           <View style={styles.actionContainer}>
             <View style={styles.likeAndSaveContainer}>
               <TouchableOpacity onPress={() => onLike(post.id)} style={styles.actionButton}>
@@ -71,10 +70,8 @@ const Post: React.FC<{
 
       <Portal>
         <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.fullScreenModal}>
-          {/* Overlay Box */}
           <View style={styles.overlayBox} />
-
-          <View style={styles.fullScreenContainer}>
+          <ScrollView contentContainerStyle={styles.fullScreenContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
               <Icon name="close" size={30} color="#ffffff" />
             </TouchableOpacity>
@@ -108,7 +105,7 @@ const Post: React.FC<{
                 <Text style={styles.submitButtonText}>Submit</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
       </Portal>
     </View>
@@ -120,7 +117,6 @@ const Forum: React.FC = () => {
   const [newPost, setNewPost] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [showInput, setShowInput] = useState(false);
-  const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
   const [viewSavedPosts, setViewSavedPosts] = useState(false);
 
   const handleAddPost = () => {
@@ -134,7 +130,7 @@ const Forum: React.FC = () => {
         hasLiked: false,
         isSaved: false,
       };
-      setPosts([newPostObject, ...posts]); // Add new posts to the beginning
+      setPosts([newPostObject, ...posts]);
       setNewPost('');
       setNewDescription('');
       setShowInput(false);
@@ -165,10 +161,6 @@ const Forum: React.FC = () => {
         ? { ...post, isSaved: !post.isSaved }
         : post
     ));
-  };
-
-  const handlePressPost = (postId: number) => {
-    setExpandedPostId(expandedPostId === postId ? null : postId);
   };
 
   const handleViewSavedPosts = () => {
@@ -208,15 +200,14 @@ const Forum: React.FC = () => {
             onSave={() => handleSave(item.id)}
             hasLiked={item.hasLiked}
             isSaved={item.isSaved}
-            isExpanded={item.id === expandedPostId}
-            onPress={() => handlePressPost(item.id)}
+            onPress={() => {}} // Removed post click handling since it opens modal
           />
         )}
         showsVerticalScrollIndicator={false}
       />
       
       <TouchableOpacity style={styles.bookmarkButton} onPress={handleViewSavedPosts}>
-        <Icon name="bookmark" size={30} color={viewSavedPosts ? 'green' : 'blue'} />
+        <Icon name="bookmark" size={30} color={viewSavedPosts ? 'green' : '#083248'} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.floatingButton} onPress={() => setShowInput(!showInput)}>
@@ -229,7 +220,7 @@ const Forum: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // Main background color
+    backgroundColor: '#000000',
     paddingTop: 40,
     paddingHorizontal: 10,
   },
@@ -237,19 +228,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#35374f',
     padding: 20,
     borderRadius: 10,
-    marginBottom: 10, // Added margin to separate input area from posts
+    marginBottom: 10,
   },
   post: {
-    backgroundColor: '#35374f',
+    backgroundColor: '#111111',
     padding: 20,
     borderRadius: 10,
     marginBottom: 10,
     borderColor: '#4F515B',
     borderWidth: 1,
-  },
-  expandedPost: {
-    borderColor: '#007AFF',
-    borderWidth: 2,
   },
   postTitle: {
     fontSize: 18,
@@ -304,7 +291,7 @@ const styles = StyleSheet.create({
   commentInput: {
     flex: 1,
     marginRight: 10,
-    color: 'white', // Updated to white
+    color: 'white',
   },
   input: {
     height: 40,
@@ -312,7 +299,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     borderRadius: 5,
-    color: 'white', // Updated to white
+    color: 'white',
   },
   smallSubmitButton: {
     backgroundColor: '#4F515B',
@@ -328,11 +315,11 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     marginBottom: 10,
-    color: 'white', // Updated to white
+    color: 'white',
   },
   descriptionInput: {
     marginBottom: 10,
-    color: 'white', // Updated to white
+    color: 'white',
   },
   floatingButton: {
     position: 'absolute',
@@ -362,7 +349,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20,
-    zIndex: 1, // Ensure the close button is above other elements
+    zIndex: 1,
   },
   fullScreenModal: {
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
@@ -374,11 +361,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    zIndex: 0, // Ensure the overlay is below content
+    zIndex: 0,
   },
   fullScreenContainer: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
+    maxHeight: height * 0.85,
   },
   fullScreenTitle: {
     fontSize: 24,
