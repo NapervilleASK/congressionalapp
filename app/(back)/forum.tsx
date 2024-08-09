@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Modal, Portal, Button } from 'react-native-paper';
+import { Modal, Portal } from 'react-native-paper';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface PostType {
   id: number;
@@ -42,7 +42,7 @@ const Post: React.FC<{
   const hideModal = () => setVisible(false);
 
   return (
-    <View style={styles.post}>
+    <View style={[styles.post, isExpanded && styles.expandedPost]}>
       <TouchableWithoutFeedback onPress={showModal}>
         <View>
           <Text style={styles.postTitle}>{post.title}</Text>
@@ -70,11 +70,17 @@ const Post: React.FC<{
       </TouchableWithoutFeedback>
 
       <Portal>
-        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalContainer}>
-          <View>
-            <Text style={styles.postTitle}>{post.title}</Text>
-            <Text style={styles.postContent}>{post.content}</Text>
-            
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.fullScreenModal}>
+          {/* Overlay Box */}
+          <View style={styles.overlayBox} />
+
+          <View style={styles.fullScreenContainer}>
+            <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
+              <Icon name="close" size={30} color="#ffffff" />
+            </TouchableOpacity>
+            <Text style={styles.fullScreenTitle}>{post.title}</Text>
+            <Text style={styles.fullScreenContent}>{post.content}</Text>
+
             <FlatList
               data={post.comments}
               keyExtractor={(item, index) => index.toString()}
@@ -91,7 +97,7 @@ const Post: React.FC<{
                 style={styles.commentInput}
               />
               <TouchableOpacity 
-                style={styles.submitButton} 
+                style={styles.smallSubmitButton} 
                 onPress={() => {
                   if (newComment.trim()) {
                     onAddComment(post.id, newComment);
@@ -171,33 +177,26 @@ const Forum: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.addButton} onPress={handleViewSavedPosts}>
-          <Text style={styles.addButtonText}>{viewSavedPosts ? 'View All Posts' : 'View Saved Posts'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={() => setShowInput(true)}>
-          <Text style={styles.addButtonText}>Create New Post</Text>
-        </TouchableOpacity>
-      </View>
       {showInput && (
-        <View style={styles.inputContainer}>
-          <InputField
-            value={newPost}
-            onChangeText={setNewPost}
-            placeholder="Title"
-            style={[styles.titleInput, styles.boldText]} // Added bold style
+        <View style={styles.inputContainerTop}>
+          <InputField 
+            value={newPost} 
+            onChangeText={setNewPost} 
+            placeholder="Post Title" 
+            style={styles.titleInput} 
           />
-          <InputField
-            value={newDescription}
-            onChangeText={setNewDescription}
-            placeholder="Description"
-            style={styles.descriptionInput} // Updated color
+          <InputField 
+            value={newDescription} 
+            onChangeText={setNewDescription} 
+            placeholder="Post Description" 
+            style={styles.descriptionInput} 
           />
-          <TouchableOpacity style={styles.submitButton} onPress={handleAddPost}>
-            <Text style={styles.submitButtonText}>Add Post</Text>
+          <TouchableOpacity style={styles.smallSubmitButton} onPress={handleAddPost}>
+            <Text style={styles.submitButtonText}>Submit</Text>
           </TouchableOpacity>
         </View>
       )}
+
       <FlatList
         data={viewSavedPosts ? posts.filter(post => post.isSaved) : posts}
         keyExtractor={(item) => item.id.toString()}
@@ -215,6 +214,14 @@ const Forum: React.FC = () => {
         )}
         showsVerticalScrollIndicator={false}
       />
+      
+      <TouchableOpacity style={styles.bookmarkButton} onPress={handleViewSavedPosts}>
+        <Icon name="bookmark" size={30} color={viewSavedPosts ? 'green' : 'blue'} />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.floatingButton} onPress={() => setShowInput(!showInput)}>
+        <Icon name="add" size={30} color="#ffffff" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -226,75 +233,39 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 10,
   },
-  buttonContainer: {
-    flexDirection: 'column', // Stack buttons vertically
-    marginBottom: 10,
-  },
-  addButton: {
-    backgroundColor: '#228B22', // Green for buttons
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-    alignSelf: 'center', // Center buttons
-  },
-  addButtonText: {
-    color: '#ffffff', // White text
-    textAlign: 'center',
-  },
-  inputContainer: {
-    width: width * 0.9, // Responsive width
-    backgroundColor: '#1C1C1C', // Dark background for input container
-    padding: 15,
+  inputContainerTop: {
+    backgroundColor: '#35374f',
+    padding: 20,
     borderRadius: 10,
-    marginBottom: 10,
-    alignSelf: 'center',
+    marginBottom: 10, // Added margin to separate input area from posts
   },
   post: {
-    backgroundColor: '#1C1C1C', // Dark background for posts
-    padding: 15,
+    backgroundColor: '#35374f',
+    padding: 20,
     borderRadius: 10,
     marginBottom: 10,
+    borderColor: '#4F515B',
+    borderWidth: 1,
+  },
+  expandedPost: {
+    borderColor: '#007AFF',
+    borderWidth: 2,
   },
   postTitle: {
     fontSize: 18,
-    color: '#006400', // Dark green for titles
     fontWeight: 'bold',
-    marginBottom: 10, // Space between title and description
+    color: '#FFFFFF',
   },
   postContent: {
     fontSize: 16,
-    color: '#D3D3D3', // White text for content
-    marginBottom: 10, // Space between content and comments
-  },
-  input: {
-    backgroundColor: '#1C1C1C', // Dark background for input fields
-    color: '#006400', // Dark green text
-    borderWidth: 1,
-    borderColor: '#006400', // Dark green border
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  titleInput: {
-    fontSize: 18,
-  },
-  descriptionInput: {
-    fontSize: 16,
-    color: '#D3D3D3', // White text
-  },
-  submitButton: {
-    backgroundColor: '#228B22', // Green for submit button
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    color: '#ffffff', // White text
+    marginTop: 10,
+    color: '#D3D3D3',
   },
   actionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 10,
   },
   likeAndSaveContainer: {
     flexDirection: 'row',
@@ -325,28 +296,113 @@ const styles = StyleSheet.create({
     color: '#D3D3D3',
     marginLeft: 5,
   },
-  commentsContainer: {
-    maxHeight: 150, // Adjust as needed
-  },
   commentInputContainer: {
     flexDirection: 'row',
+    marginTop: 10,
     alignItems: 'center',
   },
   commentInput: {
     flex: 1,
     marginRight: 10,
+    color: 'white', // Updated to white
+  },
+  input: {
+    height: 40,
+    borderColor: '#D3D3D3',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    color: 'white', // Updated to white
+  },
+  smallSubmitButton: {
+    backgroundColor: '#4F515B',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  titleInput: {
+    marginBottom: 10,
+    color: 'white', // Updated to white
+  },
+  descriptionInput: {
+    marginBottom: 10,
+    color: 'white', // Updated to white
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#8CDBA9',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  bookmarkButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 90,
+    backgroundColor: '#4F515B',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    zIndex: 1, // Ensure the close button is above other elements
+  },
+  fullScreenModal: {
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  overlayBox: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    zIndex: 0, // Ensure the overlay is below content
+  },
+  fullScreenContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  fullScreenTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  fullScreenContent: {
+    fontSize: 18,
+    color: '#D3D3D3',
+    marginBottom: 20,
+  },
+  commentsContainer: {
+    flex: 1,
+    marginTop: 10,
   },
   comment: {
-    color: '#D3D3D3', // Light gray for comments
-    marginVertical: 5,
-  },
-  modalContainer: {
-    backgroundColor: '#1C1C1C', // Dark background for modal
-    padding: 20,
-    borderRadius: 10,
-  },
-  boldText: {
-    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#D3D3D3',
+    marginBottom: 10,
+    backgroundColor: '#35374f',
+    padding: 10,
+    borderRadius: 5,
   },
 });
 
