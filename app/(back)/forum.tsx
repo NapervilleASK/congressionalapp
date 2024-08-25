@@ -1,21 +1,43 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions, ScrollView, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Modal, Portal } from 'react-native-paper';
 
 const { width, height } = Dimensions.get('window');
 
+interface Comment {
+  comment: string;
+}
+
 interface PostType {
   id: number;
   title: string;
   content: string;
-  comments: string[];
+  comments: Comment[];
   likes: number;
   hasLiked: boolean;
   isSaved: boolean;
 }
 
-const InputField: React.FC<{ value: string; onChangeText: (text: string) => void; placeholder: string; style?: object }> = ({ value, onChangeText, placeholder, style }) => (
+interface InputFieldProps {
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  style?: StyleProp<TextStyle>;
+}
+
+interface PostProps {
+  post: PostType;
+  onAddComment: (postId: number, comment: string) => void;
+  onLike: (postId: number) => void;
+  onSave: (postId: number) => void;
+  hasLiked: boolean;
+  isSaved: boolean;
+  onPress: () => void;
+}
+
+const InputField: React.FC<InputFieldProps> = ({ value, onChangeText, placeholder, style }) => (
   <TextInput
     style={[styles.input, style]}
     value={value}
@@ -25,17 +47,9 @@ const InputField: React.FC<{ value: string; onChangeText: (text: string) => void
   />
 );
 
-const Post: React.FC<{
-  post: PostType;
-  onAddComment: (postId: number, comment: string) => void;
-  onLike: (postId: number) => void;
-  onSave: (postId: number) => void;
-  hasLiked: boolean;
-  isSaved: boolean;
-  onPress: () => void;
-}> = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, onPress }) => {
-  const [newComment, setNewComment] = useState('');
-  const [visible, setVisible] = useState(false);
+const Post: React.FC<PostProps> = ({ post, onAddComment, onLike, onSave, hasLiked, isSaved, onPress }) => {
+  const [newComment, setNewComment] = useState<string>('');
+  const [visible, setVisible] = useState<boolean>(false);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
@@ -59,7 +73,7 @@ const Post: React.FC<{
               </TouchableOpacity>
             </View>
             <View style={styles.commentSection}>
-              <TouchableOpacity style={styles.commentButton}>
+              <TouchableOpacity style={styles.commentButton} onPress={showModal}>
                 <Icon name="comment" size={24} color="#D3D3D3" />
                 <Text style={styles.commentCount}>{post.comments.length}</Text>
               </TouchableOpacity>
@@ -81,7 +95,7 @@ const Post: React.FC<{
             <FlatList
               data={post.comments}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => <Text style={styles.comment}>{item}</Text>}
+              renderItem={({ item }) => <Text style={styles.comment}>{item.comment}</Text>}
               showsVerticalScrollIndicator={false}
               style={styles.commentsContainer}
             />
@@ -114,15 +128,28 @@ const Post: React.FC<{
 
 const Forum: React.FC = () => {
   const [posts, setPosts] = useState<PostType[]>([]);
-  const [newPost, setNewPost] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [showInput, setShowInput] = useState(false);
-  const [viewSavedPosts, setViewSavedPosts] = useState(false);
+  const [newPost, setNewPost] = useState<string>('');
+  const [newDescription, setNewDescription] = useState<string>('');
+  const [showInput, setShowInput] = useState<boolean>(false);
+  const [viewSavedPosts, setViewSavedPosts] = useState<boolean>(false);
 
-  const handleAddPost = () => {
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAddPost = async () => {
     if (newPost.trim() && newDescription.trim()) {
-      const newPostObject: PostType = {
-        id: posts.length + 1,
+      const newPostObject = {
+        id: Date.now(), // Use a unique ID, e.g., timestamp or UUID
         title: newPost,
         content: newDescription,
         comments: [],
@@ -130,36 +157,65 @@ const Forum: React.FC = () => {
         hasLiked: false,
         isSaved: false,
       };
-      setPosts([newPostObject, ...posts]);
-      setNewPost('');
-      setNewDescription('');
-      setShowInput(false);
+      try {
+        await axios.post('http://localhost:3000/posts', newPostObject);
+        fetchPosts();
+        setNewPost('');
+        setNewDescription('');
+        setShowInput(false);
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       alert('Please enter both title and description');
     }
   };
 
-  const handleAddComment = (postId: number, comment: string) => {
-    setPosts(posts.map(post =>
-      post.id === postId
-        ? { ...post, comments: [...post.comments, comment] }
-        : post
-    ));
+  const handleAddComment = async (postId: number, comment: string) => {
+    if (comment.trim()) {
+      try {
+        await axios.post('http://localhost:3000/comment', { id: postId, comment });
+        fetchPosts();
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      alert('Comment cannot be empty');
+    }
   };
 
-  const handleLike = (postId: number) => {
-    setPosts(posts.map(post =>
-      post.id === postId
-        ? { ...post, likes: post.hasLiked ? post.likes - 1 : post.likes + 1, hasLiked: !post.hasLiked }
-        : post
-    ));
+  const handleLike = async (postId: number) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
+        if (post.id === postId) {
+          // Prevent multiple likes
+          if (post.hasLiked) {
+            return post;
+          }
+
+          // Toggle like and update the likes count
+          return {
+            ...post,
+            hasLiked: true,
+            likes: post.likes + 1,
+          };
+        }
+        return post;
+      })
+    );
+
+    try {
+      await axios.post('http://localhost:3000/like', { id: postId });
+      fetchPosts(); // Optional: to ensure the state is in sync with the server
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleSave = (postId: number) => {
+  const handleSave = async (postId: number) => {
+    // Assuming you want to handle saving posts in the UI rather than a server call
     setPosts(posts.map(post =>
-      post.id === postId
-        ? { ...post, isSaved: !post.isSaved }
-        : post
+      post.id === postId ? { ...post, isSaved: !post.isSaved } : post
     ));
   };
 
@@ -223,13 +279,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     paddingTop: 40,
     paddingHorizontal: 10,
-  },
+  } as ViewStyle,
   inputContainerTop: {
     backgroundColor: '#35374f',
     padding: 20,
     borderRadius: 10,
     marginBottom: 10,
-  },
+  } as ViewStyle,
   post: {
     backgroundColor: '#111111',
     padding: 20,
@@ -237,62 +293,62 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderColor: '#4F515B',
     borderWidth: 1,
-  },
+  } as ViewStyle,
   postTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
-  },
+  } as TextStyle,
   postContent: {
     fontSize: 16,
     marginTop: 10,
     color: '#D3D3D3',
-  },
+  } as TextStyle,
   actionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
-  },
+  } as ViewStyle,
   likeAndSaveContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
+  } as ViewStyle,
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 10,
-  },
+  } as ViewStyle,
   likeCount: {
     color: '#D3D3D3',
     marginLeft: 5,
-  },
+  } as TextStyle,
   saveCount: {
     color: '#D3D3D3',
     marginLeft: 5,
-  },
+  } as TextStyle,
   commentSection: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
+  } as ViewStyle,
   commentButton: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
+  } as ViewStyle,
   commentCount: {
     color: '#D3D3D3',
     marginLeft: 5,
-  },
+  } as TextStyle,
   commentInputContainer: {
     flexDirection: 'row',
     marginTop: 10,
     alignItems: 'center',
-  },
+  } as ViewStyle,
   commentInput: {
     flex: 1,
     marginRight: 10,
     color: 'white',
-  },
+  } as TextStyle,
   input: {
     height: 40,
     borderColor: '#D3D3D3',
@@ -300,27 +356,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
     color: 'white',
-  },
+  } as TextStyle,
   smallSubmitButton: {
     backgroundColor: '#4F515B',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,
     alignItems: 'center',
-  },
+  } as ViewStyle,
   submitButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
-  },
+  } as TextStyle,
   titleInput: {
     marginBottom: 10,
     color: 'white',
-  },
+  } as TextStyle,
   descriptionInput: {
     marginBottom: 10,
     color: 'white',
-  },
+  } as TextStyle,
   floatingButton: {
     position: 'absolute',
     right: 20,
@@ -332,7 +388,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
-  },
+  } as ViewStyle,
   bookmarkButton: {
     position: 'absolute',
     right: 20,
@@ -344,46 +400,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,
-  },
+  } as ViewStyle,
   closeButton: {
     position: 'absolute',
     top: 20,
     right: 20,
     zIndex: 1,
-  },
+  } as ViewStyle,
   fullScreenModal: {
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
     flex: 1,
     justifyContent: 'center',
-  },
+  } as ViewStyle,
   overlayBox: {
     position: 'absolute',
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     zIndex: 0,
-  },
+  } as ViewStyle,
   fullScreenContainer: {
     flexGrow: 1,
     padding: 20,
     maxHeight: height * 0.85,
-  },
+  } as ViewStyle,
   fullScreenTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 10,
     textAlign: 'center',
-  },
+  } as TextStyle,
   fullScreenContent: {
     fontSize: 18,
     color: '#D3D3D3',
     marginBottom: 20,
-  },
+  } as TextStyle,
   commentsContainer: {
     flex: 1,
     marginTop: 10,
-  },
+  } as ViewStyle,
   comment: {
     fontSize: 16,
     color: '#D3D3D3',
@@ -391,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#35374f',
     padding: 10,
     borderRadius: 5,
-  },
+  } as TextStyle,
 });
 
 export default Forum;
