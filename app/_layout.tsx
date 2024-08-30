@@ -18,6 +18,7 @@ export default function RootLayout() {
     <PaperProvider>
     <ThemeProvider value={DarkTheme}>
       <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false}} />
         {/*@ts-ignore*/}
         <Stack.Screen name="(back)" options={{ headerTitleAlign: 'center',headerTitle: (props) => <LogoTitle {...props} /> }} />
         {/*@ts-ignore*/}
