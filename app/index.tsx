@@ -1,30 +1,46 @@
 import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Image, Animated } from 'react-native'
 import React, { useState, useRef } from 'react'
 import { auth } from '../FirebaseConfig'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { router } from 'expo-router' 
 
 const index = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [showLogin, setShowLogin] = useState(false);
+    const [showSignup, setShowSignup] = useState(false);
 
     const signIn = async () => {
         try {
-            const user = await signInWithEmailAndPassword(auth, email, password)
+            const user = await signInWithEmailAndPassword(auth, email, password);
             if (user) router.replace('/(back)');
         } catch (error: any) {
-            console.log(error)
+            console.log(error);
             alert('Sign in failed: ' + error.message);
         }
     }
 
     const signUp = async () => {
+        if (password !== confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
         try {
-            const user = await createUserWithEmailAndPassword(auth, email, password)
-            if (user) router.replace('/(back)');
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            if (user) {
+                await updateProfile(user, {
+                    displayName: `${firstName} ${lastName}`,
+                });
+                router.replace('/(back)');
+            }
         } catch (error: any) {
-            console.log(error)
-            alert('Sign in failed: ' + error.message);
+            console.log(error);
+            alert('Sign up failed: ' + error.message);
         }
     }
 
@@ -55,14 +71,77 @@ const index = () => {
                     style={{ width: 200, height: 200 }}
                     source={require('@/assets/images/leaves.png')}
                 />
-                <TextInput style={styles.textInput} placeholder="email" value={email} onChangeText={setEmail} />
-                <TextInput style={styles.textInput} placeholder="password" value={password} onChangeText={setPassword} secureTextEntry/>
-                <TouchableOpacity style={styles.button} onPress={signIn}>
-                        <Text style={styles.text}>Login</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={signUp}>
-                    <Text style={styles.text}>Make Account</Text>
-                </TouchableOpacity>
+                {!showLogin && !showSignup && (
+                    <>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowLogin(true)}>
+                            <Text style={styles.text}>Login</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={() => setShowSignup(true)}>
+                            <Text style={styles.text}>Sign Up</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
+
+                {showLogin && (
+                    <>
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="Email" 
+                            value={email} 
+                            onChangeText={setEmail} 
+                        />
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="Password" 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            secureTextEntry
+                        />
+                        <TouchableOpacity style={styles.button} onPress={signIn}>
+                            <Text style={styles.text}>Login</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
+
+                {showSignup && (
+                    <>
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="First Name" 
+                            value={firstName} 
+                            onChangeText={setFirstName} 
+                        />
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="Last Name" 
+                            value={lastName} 
+                            onChangeText={setLastName} 
+                        />
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="Email" 
+                            value={email} 
+                            onChangeText={setEmail} 
+                        />
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="Password" 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            secureTextEntry
+                        />
+                        <TextInput 
+                            style={styles.textInput} 
+                            placeholder="Confirm Password" 
+                            value={confirmPassword} 
+                            onChangeText={setConfirmPassword} 
+                            secureTextEntry
+                        />
+                        <TouchableOpacity style={styles.button} onPress={signUp}>
+                            <Text style={styles.text}>Sign Up</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
             </SafeAreaView>
         </Animated.View>
     )

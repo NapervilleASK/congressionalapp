@@ -3,11 +3,14 @@ import axios from 'axios';
 import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions, ScrollView, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Modal, Portal } from 'react-native-paper';
+import { auth } from '../../FirebaseConfig'; // Import Firebase Auth
+import { onAuthStateChanged } from 'firebase/auth';
 
 const { width, height } = Dimensions.get('window');
 
 interface Comment {
   comment: string;
+  author: string; // Add author field for comments
 }
 
 interface PostType {
@@ -18,6 +21,7 @@ interface PostType {
   likes: number;
   hasLiked: boolean;
   isSaved: boolean;
+  author: string; // Add author field for posts
 }
 
 interface InputFieldProps {
@@ -59,6 +63,7 @@ const Post: React.FC<PostProps> = ({ post, onAddComment, onLike, onSave, hasLike
       <TouchableWithoutFeedback onPress={showModal}>
         <View>
           <Text style={styles.postTitle}>{post.title}</Text>
+          <Text style={styles.postAuthor}>By: {post.author}</Text> {/* Display author's name */}
           <Text style={styles.postContent}>{post.content}</Text>
 
           <View style={styles.actionContainer}>
@@ -95,7 +100,9 @@ const Post: React.FC<PostProps> = ({ post, onAddComment, onLike, onSave, hasLike
             <FlatList
               data={post.comments}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => <Text style={styles.comment}>{item.comment}</Text>}
+              renderItem={({ item }) => (
+                <Text style={styles.comment}>{item.author}: {item.comment}</Text> // Display comment author
+              )}
               showsVerticalScrollIndicator={false}
               style={styles.commentsContainer}
             />
@@ -132,9 +139,19 @@ const Forum: React.FC = () => {
   const [newDescription, setNewDescription] = useState<string>('');
   const [showInput, setShowInput] = useState<boolean>(false);
   const [viewSavedPosts, setViewSavedPosts] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>(''); // State for storing user name
 
   useEffect(() => {
     fetchPosts();
+
+    // Listen for authentication state changes and retrieve user name
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && user.displayName) {
+        setUserName(user.displayName); // Set the user's display name
+      }
+    });
+
+    return unsubscribe; // Cleanup subscription on unmount
   }, []);
 
   const fetchPosts = async () => {
@@ -149,13 +166,14 @@ const Forum: React.FC = () => {
   const handleAddPost = async () => {
     if (newPost.trim() && newDescription.trim()) {
       const newPostObject = {
-        id: Date.now(), // Use a unique ID, e.g., timestamp or UUID
+        id: Date.now(),
         title: newPost,
         content: newDescription,
         comments: [],
         likes: 0,
         hasLiked: false,
         isSaved: false,
+        author: userName, // Include the author's name
       };
       try {
         await axios.post('http://localhost:3000/posts', newPostObject);
@@ -174,7 +192,11 @@ const Forum: React.FC = () => {
   const handleAddComment = async (postId: number, comment: string) => {
     if (comment.trim()) {
       try {
-        await axios.post('http://localhost:3000/comment', { id: postId, comment });
+        await axios.post('http://localhost:3000/comment', {
+          id: postId,
+          comment,
+          author: userName, // Include the author's name
+        });
         fetchPosts();
       } catch (error) {
         console.error(error);
@@ -187,18 +209,8 @@ const Forum: React.FC = () => {
   const handleLike = async (postId: number) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) => {
-        if (post.id === postId) {
-          // Prevent multiple likes
-          if (post.hasLiked) {
-            return post;
-          }
-
-          // Toggle like and update the likes count
-          return {
-            ...post,
-            hasLiked: true,
-            likes: post.likes + 1,
-          };
+        if (post.id === postId && !post.hasLiked) {
+          return { ...post, hasLiked: true, likes: post.likes + 1 };
         }
         return post;
       })
@@ -206,17 +218,14 @@ const Forum: React.FC = () => {
 
     try {
       await axios.post('http://localhost:3000/like', { id: postId });
-      fetchPosts(); // Optional: to ensure the state is in sync with the server
+      fetchPosts();
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleSave = async (postId: number) => {
-    // Assuming you want to handle saving posts in the UI rather than a server call
-    setPosts(posts.map(post =>
-      post.id === postId ? { ...post, isSaved: !post.isSaved } : post
-    ));
+    setPosts(posts.map(post => post.id === postId ? { ...post, isSaved: !post.isSaved } : post));
   };
 
   const handleViewSavedPosts = () => {
@@ -252,28 +261,52 @@ const Forum: React.FC = () => {
           <Post
             post={item}
             onAddComment={handleAddComment}
-            onLike={() => handleLike(item.id)}
-            onSave={() => handleSave(item.id)}
+            onLike={handleLike}
+            onSave={handleSave}
             hasLiked={item.hasLiked}
             isSaved={item.isSaved}
-            onPress={() => {}} // Removed post click handling since it opens modal
+            onPress={() => {}}
           />
         )}
         showsVerticalScrollIndicator={false}
+        style={styles.postsContainer}
       />
-      
-      <TouchableOpacity style={styles.bookmarkButton} onPress={handleViewSavedPosts}>
-        <Icon name="bookmark" size={30} color={viewSavedPosts ? 'green' : '#083248'} />
-      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.floatingButton} onPress={() => setShowInput(!showInput)}>
-        <Icon name="add" size={30} color="#ffffff" />
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => setShowInput(!showInput)}>
+          <Text style={styles.buttonText}>{showInput ? 'Close' : 'Add Post'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleViewSavedPosts}>
+          <Text style={styles.buttonText}>{viewSavedPosts ? 'View All Posts' : 'View Saved Posts'}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  postsContainer: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#FFF',
+  },
+  button: {
+    flex: 1,
+    backgroundColor: '#6200ee',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 16,
+  },
   container: {
     flex: 1,
     backgroundColor: '#000000',
@@ -447,6 +480,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#35374f',
     padding: 10,
     borderRadius: 5,
+  } as TextStyle,
+  postAuthor: {
+    fontSize: 14,
+    color: '#D3D3D3',
+    marginBottom: 5,
   } as TextStyle,
 });
 
