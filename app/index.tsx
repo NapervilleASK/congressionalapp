@@ -4,6 +4,8 @@ import { auth } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { router } from 'expo-router' 
 
+import { Dialog, Portal, Button, Paragraph } from 'react-native-paper';
+
 const index = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -13,21 +15,36 @@ const index = () => {
     const [showLogin, setShowLogin] = useState(false);
     const [showSignup, setShowSignup] = useState(false);
 
+    const [visible, setVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const hideDialog = () => setVisible(false);
+
     const signIn = async () => {
         try {
             const user = await signInWithEmailAndPassword(auth, email, password);
             if (user) router.replace('/(back)');
         } catch (error: any) {
             console.log(error);
-            alert('Sign in failed: ' + error.message);
+
+            setErrorMessage('Sign in failed: ' + error.message);
+            setVisible(true);
         }
     }
 
     const signUp = async () => {
         if (password !== confirmPassword) {
-            alert('Passwords do not match');
+            setErrorMessage('Sign up failed: passwords do not match.');
+            setVisible(true);
             return;
         }
+
+        if (firstName == ""  || lastName == ""){
+            setErrorMessage('Sign up failed: please set a name.');
+            setVisible(true);
+            return;
+        }
+        
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -40,7 +57,8 @@ const index = () => {
             }
         } catch (error: any) {
             console.log(error);
-            alert('Sign up failed: ' + error.message);
+            setErrorMessage('Sign up failed: ' + error.message);
+            setVisible(true);
         }
     }
 
@@ -71,6 +89,32 @@ const index = () => {
                     style={{ width: 200, height: 200 }}
                     source={require('@/assets/images/leaves.png')}
                 />
+                <Portal>
+                    <Dialog
+                    visible={visible}
+                    onDismiss={hideDialog}
+                    style={{ backgroundColor: '#1a1a1a' }}
+                    >
+                    <Dialog.Title style={{ color: '#00ff00', fontSize: 24, fontWeight: 'bold' }}>
+                        Error
+                    </Dialog.Title>
+                    <Dialog.Content>
+                        <Paragraph style={{ color: '#ffffff', fontSize: 18, lineHeight: 24 }}>
+                        {errorMessage}
+                        </Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button 
+                        onPress={hideDialog} 
+                        textColor="#00ff00"
+                        labelStyle={{ fontSize: 18, fontWeight: 'bold' }}
+                        >
+                        OK
+                        </Button>
+                    </Dialog.Actions>
+                    </Dialog>
+                </Portal>
+
                 {!showLogin && !showSignup && (
                     <>
                         <TouchableOpacity style={styles.button} onPress={() => setShowLogin(true)}>
@@ -99,6 +143,10 @@ const index = () => {
                         />
                         <TouchableOpacity style={styles.button} onPress={signIn}>
                             <Text style={styles.text}>Login</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.button} onPress={() => setShowLogin(false)}>
+                            <Text style={styles.text}>Back</Text>
                         </TouchableOpacity>
                     </>
                 )}
@@ -139,6 +187,10 @@ const index = () => {
                         />
                         <TouchableOpacity style={styles.button} onPress={signUp}>
                             <Text style={styles.text}>Sign Up</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.button} onPress={() => setShowSignup(false)}>
+                            <Text style={styles.text}>Back</Text>
                         </TouchableOpacity>
                     </>
                 )}
