@@ -59,77 +59,79 @@ const Post: React.FC<PostProps> = ({ post, onAddComment, onLike, onSave, hasLike
   const hideModal = () => setVisible(false);
 
   return (
-    <View style={styles.post}>
-      <TouchableWithoutFeedback onPress={showModal}>
-        <View>
-          <Text style={styles.postTitle}>{post.title}</Text>
-          <Text style={styles.postAuthor}>By: {post.author}</Text> {/* Display author's name */}
-          <Text style={styles.postContent}>{post.content}</Text>
+<View style={styles.post}>
+  <TouchableWithoutFeedback onPress={showModal}>
+    <View>
+      <Text style={styles.postTitle}>{post.title}</Text>
+      <Text style={styles.postAuthor}>By: {post.author}</Text> {/* Display author's name */}
+      <Text style={styles.postContent}>{post.content}</Text>
 
-          <View style={styles.actionContainer}>
-            <View style={styles.likeAndSaveContainer}>
-              <TouchableOpacity onPress={() => onLike(post.id)} style={styles.actionButton}>
-                <Icon name={hasLiked ? 'favorite' : 'favorite-border'} size={24} color={hasLiked ? 'red' : 'gray'} />
-                <Text style={styles.likeCount}>{post.likes}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => onSave(post.id)} style={styles.actionButton}>
-                <Icon name={isSaved ? 'bookmark' : 'bookmark-border'} size={24} color={isSaved ? 'green' : 'gray'} />
-                <Text style={styles.saveCount}>{isSaved ? 'Saved' : 'Save'}</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.commentSection}>
-              <TouchableOpacity style={styles.commentButton} onPress={showModal}>
-                <Icon name="comment" size={24} color="#D3D3D3" />
-                <Text style={styles.commentCount}>{post.comments.length}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+      <View style={styles.actionContainer}>
+        <View style={styles.likeAndSaveContainer}>
+          <TouchableOpacity onPress={() => onLike(post.id)} style={styles.actionButton}>
+            <Icon name={hasLiked ? 'favorite' : 'favorite-border'} size={24} color={hasLiked ? 'red' : 'gray'} />
+            <Text style={styles.likeCount}>{post.likes}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onSave(post.id)} style={styles.actionButton}>
+            <Icon name={isSaved ? 'bookmark' : 'bookmark-border'} size={24} color={isSaved ? 'green' : 'gray'} />
+            <Text style={styles.saveCount}>{isSaved ? 'Saved' : 'Save'}</Text>
+          </TouchableOpacity>
         </View>
-      </TouchableWithoutFeedback>
-
-      <Portal>
-        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.fullScreenModal}>
-          <View style={styles.overlayBox} />
-          <ScrollView contentContainerStyle={styles.fullScreenContainer}>
-            <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
-              <Icon name="close" size={30} color="#ffffff" />
-            </TouchableOpacity>
-            <Text style={styles.fullScreenTitle}>{post.title}</Text>
-            <Text style={styles.fullScreenContent}>{post.content}</Text>
-
-            <FlatList
-              data={post.comments}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <Text style={styles.comment}>{item.author}: {item.comment}</Text> // Display comment author
-              )}
-              showsVerticalScrollIndicator={false}
-              style={styles.commentsContainer}
-            />
-
-            <View style={styles.commentInputContainer}>
-              <InputField
-                value={newComment}
-                onChangeText={setNewComment}
-                placeholder="Add a comment"
-                style={styles.commentInput}
-              />
-              <TouchableOpacity 
-                style={styles.smallSubmitButton} 
-                onPress={() => {
-                  if (newComment.trim()) {
-                    onAddComment(post.id, newComment);
-                    setNewComment('');
-                  }
-                }}
-              >
-                <Text style={styles.submitButtonText}>Submit</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </Modal>
-      </Portal>
+        <View style={styles.commentSection}>
+          <TouchableOpacity style={styles.commentButton} onPress={showModal}>
+            <Icon name="comment" size={24} color="#D3D3D3" />
+            <Text style={styles.commentCount}>{post.comments.length}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
+  </TouchableWithoutFeedback>
+
+  <Portal>
+    <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.fullScreenModal}>
+      <View style={styles.overlayBox} />
+      <View style={styles.fullScreenContainer}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+          <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
+            <Icon name="close" size={30} color="#ffffff" />
+          </TouchableOpacity>
+          <Text style={styles.fullScreenTitle}>{post.title}</Text>
+          <Text style={styles.fullScreenContent}>{post.content}</Text>
+
+          <FlatList
+            data={post.comments}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <Text style={styles.comment}>{item.comment}</Text> // Display comment author
+            )}
+            showsVerticalScrollIndicator={false}
+            style={styles.commentsContainer}
+          />
+        </ScrollView>
+
+        <View style={styles.commentInputContainer}>
+          <InputField
+            value={newComment}
+            onChangeText={setNewComment}
+            placeholder="Add a comment"
+            style={styles.commentInput}
+          />
+          <TouchableOpacity 
+            style={styles.smallSubmitButton} 
+            onPress={() => {
+              if (newComment.trim()) {
+                onAddComment(post.id, newComment);
+                setNewComment('');
+              }
+            }}
+          >
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  </Portal>
+</View>
   );
 };
 
@@ -140,29 +142,67 @@ const Forum: React.FC = () => {
   const [showInput, setShowInput] = useState<boolean>(false);
   const [viewSavedPosts, setViewSavedPosts] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>(''); // State for storing user name
-
+  const [email, setEmail] = useState<string>(''); // State for storing user name
+  const [likedPosts, setLikedPosts] = useState<number[]>([]);
   useEffect(() => {
     fetchPosts();
 
     // Listen for authentication state changes and retrieve user name
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.displayName) {
-        setUserName(user.displayName); // Set the user's display name
+      if (user && user.displayName && user.email) {
+        setUserName(user.displayName);
+        setEmail(user.email)
       }
     });
 
     return unsubscribe; // Cleanup subscription on unmount
   }, []);
 
-  const fetchPosts = async () => {
+  const fetchLikedPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/posts');
-      setPosts(response.data);
+      if (!email) return;
+      const response = await axios.get<number[]>(`http://localhost:3000/likes/${email}`);
+      setLikedPosts(response.data);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get<PostType[]>('http://localhost:3000/posts');
+      console.log(JSON.stringify(response))
+      const postsWithLikes = response.data.map(post => ({
+        ...post,
+        hasLiked: likedPosts.includes(post.id)
+      }));
+      setPosts(postsWithLikes);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleLike = async (postId: number) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      const newHasLiked = !post.hasLiked;
+      try {
+        await axios.post('http://localhost:3000/like', { email: email, postId, newHasLiked });
+        // Update local state after liking
+        setPosts(posts.map(p =>
+          p.id === postId ? { ...p, hasLiked: newHasLiked, likes: newHasLiked ? p.likes + 1 : p.likes - 1 } : p
+        ));
+        // Fetch liked posts again to ensure consistency
+        fetchLikedPosts();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const handleSave = async (postId: number) => {
+    setPosts(posts.map(post => post.id === postId ? { ...post, isSaved: !post.isSaved } : post));
+  };
   const handleAddPost = async () => {
     if (newPost.trim() && newDescription.trim()) {
       const newPostObject = {
@@ -177,10 +217,12 @@ const Forum: React.FC = () => {
       };
       try {
         await axios.post('http://localhost:3000/posts', newPostObject);
+        setTimeout(async () => {
         fetchPosts();
         setNewPost('');
         setNewDescription('');
         setShowInput(false);
+        },500)
       } catch (error) {
         console.error(error);
       }
@@ -204,28 +246,6 @@ const Forum: React.FC = () => {
     } else {
       alert('Comment cannot be empty');
     }
-  };
-
-  const handleLike = async (postId: number) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId && !post.hasLiked) {
-          return { ...post, hasLiked: true, likes: post.likes + 1 };
-        }
-        return post;
-      })
-    );
-
-    try {
-      await axios.post('http://localhost:3000/like', { id: postId });
-      fetchPosts();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleSave = async (postId: number) => {
-    setPosts(posts.map(post => post.id === postId ? { ...post, isSaved: !post.isSaved } : post));
   };
 
   const handleViewSavedPosts = () => {
@@ -272,14 +292,20 @@ const Forum: React.FC = () => {
         style={styles.postsContainer}
       />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setShowInput(!showInput)}>
-          <Text style={styles.buttonText}>{showInput ? 'Close' : 'Add Post'}</Text>
+<View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => setShowInput(!showInput)}
+        >
+          <Icon name="add" size={24} color="gray" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleViewSavedPosts}>
-          <Text style={styles.buttonText}>{viewSavedPosts ? 'View All Posts' : 'View Saved Posts'}</Text>
+        <TouchableOpacity
+          style={styles.bookmarkButton}
+          onPress={handleViewSavedPosts}
+        >
+          <Icon name="bookmark" size={24} color="white" />
         </TouchableOpacity>
-      </View>
+  </View>
     </View>
   );
 };
@@ -287,6 +313,7 @@ const Forum: React.FC = () => {
 const styles = StyleSheet.create({
   postsContainer: {
     flex: 1,
+    cursor:'pointer'
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -374,20 +401,15 @@ const styles = StyleSheet.create({
   } as TextStyle,
   commentInputContainer: {
     flexDirection: 'row',
-    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#111111',
+    borderTopWidth: 1,
+    borderColor: '#4F515B',
     alignItems: 'center',
   } as ViewStyle,
   commentInput: {
     flex: 1,
     marginRight: 10,
-    color: 'white',
-  } as TextStyle,
-  input: {
-    height: 40,
-    borderColor: '#D3D3D3',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    borderRadius: 5,
     color: 'white',
   } as TextStyle,
   smallSubmitButton: {
@@ -407,7 +429,7 @@ const styles = StyleSheet.create({
     color: 'white',
   } as TextStyle,
   descriptionInput: {
-    marginBottom: 10,
+    marginBottom: 20,
     color: 'white',
   } as TextStyle,
   floatingButton: {
@@ -443,7 +465,6 @@ const styles = StyleSheet.create({
   fullScreenModal: {
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
     flex: 1,
-    justifyContent: 'center',
   } as ViewStyle,
   overlayBox: {
     position: 'absolute',
@@ -453,9 +474,15 @@ const styles = StyleSheet.create({
     zIndex: 0,
   } as ViewStyle,
   fullScreenContainer: {
-    flexGrow: 1,
+    flex: 1,
+    justifyContent: 'space-between',
+  } as ViewStyle,
+  scrollView: {
+    flex: 1,
+  } as ViewStyle,
+  scrollViewContent: {
     padding: 20,
-    maxHeight: height * 0.85,
+    paddingBottom: 70, // Make room for the comment input at the bottom
   } as ViewStyle,
   fullScreenTitle: {
     fontSize: 24,
@@ -467,7 +494,8 @@ const styles = StyleSheet.create({
   fullScreenContent: {
     fontSize: 18,
     color: '#D3D3D3',
-    marginBottom: 20,
+    textAlign:'center',
+    marginTop: 30,
   } as TextStyle,
   commentsContainer: {
     flex: 1,
@@ -485,6 +513,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#D3D3D3',
     marginBottom: 5,
+  } as TextStyle,
+  input: {
+    height: 40,
+    borderColor: '#D3D3D3',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    color: 'white',
   } as TextStyle,
 });
 
