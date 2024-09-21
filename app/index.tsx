@@ -1,11 +1,10 @@
-import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Image, Animated } from 'react-native'
+import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Image, Animated, Platform} from 'react-native'
 import React, { useState, useRef } from 'react'
 import { auth } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { router } from 'expo-router' 
 
 import { Dialog, Portal, Button, Paragraph } from 'react-native-paper';
-
 const index = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -203,6 +202,8 @@ export default index
 
 const styles = StyleSheet.create({
     container: {
+      width: Platform.select({web: '60%', default:'80%'}),
+      alignSelf:'center',     
       flex: 1,
       backgroundColor: '#000000',
       alignItems: 'center',
@@ -212,6 +213,7 @@ const styles = StyleSheet.create({
     title: {
       fontSize: 32,
       fontWeight: 'bold',
+      textAlign: 'center',
       color: '#4CAF50', // A green color for eco theme
     },
     textInput: {
