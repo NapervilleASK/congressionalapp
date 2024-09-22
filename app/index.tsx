@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react'
 import { auth } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { router } from 'expo-router' 
-
 import { Dialog, Portal, Button, Paragraph } from 'react-native-paper';
 const index = () => {
     const [email, setEmail] = useState('');

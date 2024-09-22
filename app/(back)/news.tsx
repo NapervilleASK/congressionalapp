@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, StyleSheet, Dimensions, Image, Platform, TouchableOpacity } from 'react-native';
+import { ScrollView, View, StyleSheet, Dimensions, Image, Platform, Pressable } from 'react-native';
 import { Card, Text, ActivityIndicator, MD2Colors } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 
@@ -45,7 +45,7 @@ const NewsDashboard = () => {
       })}
     >
       {newsData.map((article: any, index) => (
-        <TouchableOpacity
+        <Pressable 
           key={index}
           onPress={() => router.push({ pathname: 'article', params: { uri: article.uri } })}
         >
@@ -64,7 +64,7 @@ const NewsDashboard = () => {
               </View>
             </View>
           </Card>
-        </TouchableOpacity>
+        </Pressable>
       ))}
     </ScrollView>
   );
