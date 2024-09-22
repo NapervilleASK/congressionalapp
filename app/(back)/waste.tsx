@@ -20,7 +20,7 @@
     const takePicture = async () => {
       lSetVisible(true);
       //@ts-ignore
-      const photo = await ref.current.takePictureAsync({quality:0.2 ,skipProcessing:true});
+      const photo = await ref.current.takePictureAsync({quality:0.5 ,skipProcessing:true});
       let parsed;
       
       if (!photo.hasOwnProperty("base64"))
