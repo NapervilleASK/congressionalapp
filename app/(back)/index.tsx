@@ -19,16 +19,19 @@ export default function Index() {
   }, [router]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Welcome to EcoSense!</Text>
-      <Image
-        style={{ width: 200, height: 200 }}
-        source={require('@/assets/images/leaves.png')}
-      />
-      <TouchableOpacity style={styles.button} onPress={() => auth.signOut()}>
-        <Text style={styles.text}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.container}>
+        <Text style={styles.header}>Welcome to EcoSense!</Text>
+        <Image
+          style={{ width: 200, height: 200 }}
+          source={require('@/assets/images/leaves.png')}
+        />
+        <TouchableOpacity style={styles.button} onPress={() => auth.signOut()}>
+          <Text style={styles.text}>Sign Out</Text>
+        </TouchableOpacity>
+        <Text style={styles.attribution}>
+          Icons Designed By Pixellez from pngtree.com
+        </Text>
+      </View>
   );
 }
 
@@ -58,5 +61,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  attribution: {
+    position: 'absolute', // Positioning it at the bottom right
+    bottom: 20,
+    right: 20,
+    color: 'gray',
+    fontSize: 12,
+    textAlign: 'right',
   },
 });
