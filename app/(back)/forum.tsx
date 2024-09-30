@@ -1,6 +1,6 @@
-  import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect, useRef } from 'react';
   import axios from 'axios';
-  import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions, ScrollView, StyleProp, ViewStyle, TextStyle } from 'react-native';
+  import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, TouchableWithoutFeedback, Dimensions, StyleProp, ViewStyle, TextStyle, KeyboardAvoidingView, Animated, Keyboard, Easing, Platform} from 'react-native';
   import Icon from 'react-native-vector-icons/MaterialIcons';
   import { Modal, Portal } from 'react-native-paper';
   import { auth } from '../../FirebaseConfig'; // Import Firebase Auth
@@ -57,7 +57,42 @@
 
     const showModal = () => setVisible(true);
     const hideModal = () => setVisible(false);
+    const marginBottomAnim = useRef(new Animated.Value(0)).current; // Initial marginBottom value
 
+    useEffect(() => {
+      const keyboardDidShowListener = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+        () => {
+          // Animate to marginBottom: 60 when the keyboard is visible
+          Animated.timing(marginBottomAnim, {
+            toValue: 60,
+            duration: 100, // 1 second
+            easing: Easing.ease,
+            useNativeDriver: false,
+          }).start();
+        }
+      );
+      const keyboardDidHideListener = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+        () => {
+          // Animate back to marginBottom: 0 when the keyboard is hidden
+          Animated.timing(marginBottomAnim, {
+            toValue: 0,
+            duration: 100, // 1 second
+            easing: Easing.ease,
+            useNativeDriver: false,
+          }).start();
+        }
+      );
+    
+      // Clean up the listeners on component unmount
+      return () => {
+        keyboardDidHideListener.remove();
+        keyboardDidShowListener.remove();
+      };
+    }, [marginBottomAnim]);
+    
+    
     return (
   <View style={styles.post}>
     <TouchableWithoutFeedback onPress={showModal}>
@@ -87,48 +122,53 @@
         
       </View>
     </TouchableWithoutFeedback>
-    <Portal>
-      <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.fullScreenModal}>
-        <View style={styles.overlayBox} />
-        <View style={styles.smth}>
-            <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
-              <Icon name="close" size={30} color="#ffffff" />
-            </TouchableOpacity>
-            <Text style={styles.fullScreenTitle}>{"\n\n"}{post.title}</Text>
-            <Text style = {{color:"#D3D3D3", textAlign:'center', fontSize:15}}>By {post.author}</Text>
-            <Text style={styles.fullScreenContent}>{post.content}</Text>
-            <Text>{"\n\n"}</Text>
-            <FlatList
-              data={post.comments}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <Text style={styles.comment}>{item.comment}</Text> // Display comment author
-              )}
-              showsVerticalScrollIndicator={false}
-              style={styles.commentsContainer}
-            />
-          <View style={styles.commentInputContainer}>
-            <InputField
-              value={newComment}
-              onChangeText={setNewComment}
-              placeholder="Add a comment"
-              style={styles.commentInput}
-            />
-            <TouchableOpacity 
-              style={styles.smallSubmitButton} 
-              onPress={() => {
-                if (newComment.trim()) {
-                  onAddComment(post.id, newComment);
-                  setNewComment('');
-                }
-              }}
-            >
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
+      <Portal>
+      
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.fullScreenModal}>
+
+          <View style={styles.overlayBox} />
+          <View style={styles.smth}>
+              <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
+                <Icon name="close" size={30} color="#ffffff" />
+              </TouchableOpacity>
+              <Text style={styles.fullScreenTitle}>{"\n\n "}{post.title}</Text>
+              <Text style = {{color:"#D3D3D3", textAlign:'center', fontSize:15}}>By {post.author}</Text>
+              <Text style={styles.fullScreenContent}>{post.content}</Text>
+              <Text>{"\n\n"}</Text>
+              <FlatList
+                data={post.comments}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <Text style={styles.comment}>{item.comment}</Text> // Display comment author
+                )}
+                showsVerticalScrollIndicator={false}
+                style={styles.commentsContainer}
+              />
+            <KeyboardAvoidingView
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <Animated.View style={[styles.commentInputContainer, { marginBottom: marginBottomAnim }]}>
+              <InputField
+                value={newComment}
+                onChangeText={setNewComment}
+                placeholder="Add a comment"
+                style={styles.commentInput}
+              />
+              <TouchableOpacity 
+                style={styles.smallSubmitButton} 
+                onPress={() => {
+                  if (newComment.trim()) {
+                    onAddComment(post.id, newComment);
+                    setNewComment('');
+                  }
+                }}
+              >
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </Animated.View>
+            </KeyboardAvoidingView>
           </View>
-        </View>
-      </Modal>
-    </Portal>
+        </Modal>
+      </Portal>
   </View>
     );
   };
@@ -394,7 +434,7 @@ const styles = StyleSheet.create({
   } as TextStyle,
   commentInputContainer: {
     flexDirection: 'row',
-    padding: 10,
+    padding: 10,  
     backgroundColor: '#111111',
     borderTopWidth: 1,
     borderColor: '#4F515B',
