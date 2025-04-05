@@ -25,7 +25,7 @@ export default function NewsArticle() {
   if (loading) {
     return  (
         <View style={styles.loadingContainer}>                  
-            <ActivityIndicator animating={true} color={MD2Colors.red800} size="large" />
+            <ActivityIndicator animating={true} color={MD2Colors.red800} />
         </View>
     )
   }
