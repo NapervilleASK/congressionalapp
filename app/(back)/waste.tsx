@@ -1,12 +1,79 @@
   import { CameraView, useCameraPermissions } from 'expo-camera';
   import { useState, useRef } from 'react';
+  import React from 'react'
   import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
   import { readAsStringAsync, EncodingType } from 'expo-file-system';
   //@ts-ignore
   import BottomSheet from 'react-native-simple-bottom-sheet';
   import { Modal, Portal, Text, Button, ActivityIndicator, MD2Colors } from 'react-native-paper';   
 
-
+  function potentialJSON(textBlob) {
+    // 1. Input Validation
+    if (typeof textBlob !== 'string') {
+      console.error("Error: Input must be a string. Received:", typeof textBlob);
+      return null;
+    }
+  
+    // 2. Normalize: Trim surrounding whitespace
+    let content = textBlob.trim();
+  
+    // 3. Define markers
+    const startMarker = "```json";
+    const endMarker = "```";
+  
+    let jsonString;
+  
+    // 4. Check for and strip markers
+    if (content.startsWith(startMarker)) {
+      if (content.endsWith(endMarker)) {
+        // Extract content between markers
+        const startIndex = startMarker.length;
+        // Use negative index for slice to count from the end
+        const endIndex = content.length - endMarker.length;
+  
+        // Check if markers overlap or content is empty between them
+        if (startIndex >= endIndex) {
+           jsonString = ""; // Represents empty content between markers
+        } else {
+           jsonString = content.slice(startIndex, endIndex).trim(); // Trim whitespace *inside* markers too
+        }
+  
+      } else {
+        // Starts with ```json but doesn't end with ``` - treat as malformed
+        console.warn(`Warning: String starts with '${startMarker}' but does not end with '${endMarker}'. Treating as invalid.`);
+        // Don't attempt parsing in this ambiguous case
+        return null;
+      }
+    } else {
+      // Assume the entire trimmed string is the JSON content
+      jsonString = content;
+    }
+  
+    // 5. Handle empty extracted string (e.g., input was "```json```" or just "")
+    if (!jsonString) {
+        // An empty string is not valid JSON according to JSON.parse()
+        console.warn("Warning: Extracted string for parsing is empty.");
+        return null;
+    }
+  
+    // 6. Attempt to parse
+    try {
+      const parsedData = JSON.parse(jsonString);
+      return parsedData;
+    } catch (error) {
+      // Check if it's a JSON parsing error specifically
+      if (error instanceof SyntaxError) {
+        console.error("Error decoding JSON:", error.message);
+        // Optional: Log the string that failed (be careful with large strings)
+        // console.error("--- Failed content start ---\n" + jsonString.substring(0, 200) + "...\n--- Failed content end ---");
+      } else {
+        // Catch other potential errors
+        console.error("An unexpected error occurred during parsing:", error);
+      }
+      return null; // Return null on failure
+    }
+  }
+  
   export default function Waste() {
     const [visible, setVisible] = useState(false);
     const [lVisible, lSetVisible] = useState(false);
@@ -39,7 +106,7 @@
           const data = await response.text()
           console.log(data)
           //@ts-ignore
-          const { recyclable, type, info } = JSON.parse(data) ;
+          const { recyclable, type, info } = potentialJSON(data) ;
           setRecyclable(recyclable);
           setType(type);
           setInfo(info);
@@ -143,11 +210,13 @@
           </CameraView>
         </View>
         <BottomSheet isOpen={false}>
+          <View style={{ height: 300 }} >
           <Text style={styles.header}>How do I use this?</Text>
           <Text style={styles.paragraph}>
             {`\nHave you ever had something you wanted to toss, but were unsure of whether it should go in the trash, recycling bin, or compost?\n\n Our waste classification feature uses the power of AI to tell you where it should go! Just snap a picture of the waste to get started.\n\n\n`}
           </Text>
           <View />
+          </View>
         </BottomSheet>
       </>
     );
